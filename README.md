@@ -69,7 +69,7 @@ Installation can be broken down to 3 steps:
 
 1. Setting up the device
 2. Installing monitoring tools
-3. Setting up data-transering device
+3. Setting up data-transfering device
 
 ### Device setup
 This setup has been tested to work on a Debian 7 machine. In
