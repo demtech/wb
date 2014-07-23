@@ -56,10 +56,9 @@ server to store the data, the PIN code for the 3G device, the name of
 the network interface where the router is connected and lastly the
 name of the network interface where the host-machine is connected to
 the internet. As an example this should work:
-
-	````bash
+	
 	sudo ./setup.sh 192.168.0.1 1.2.3.4 1234 eth0 wlan0
-	````
+	
 ## Manual installation
 
 Failing automated install the router can be configured manually.
