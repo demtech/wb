@@ -1,3 +1,5 @@
 *~
 sshkey*
 openwrt*
+*.swp
+*.swo
