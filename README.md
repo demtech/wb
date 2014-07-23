@@ -67,9 +67,9 @@ for inspiration.
 
 Installation can be broken down to 3 steps:
 
-1. Setting up the device
-2. Installing monitoring tools
-3. Setting up data-transfering device
+1. [Setting up the device](https://github.com/demtech/wb#device-setup)
+2. [Installing monitoring tools](https://github.com/demtech/wb#installing-monitoring-tools)
+3. [Configuring 3G modem](https://github.com/demtech/wb#configuring-3g-modem)
 
 ### Device setup
 This setup has been tested to work on a Debian 7 machine. In
@@ -130,10 +130,14 @@ Lastly it is a good idea to synchronize the time (in
 the System-tab). Note that when you change the interface above,
 the device is no longer available via 192.168.1.1.
 
-### Monitoring tools
+### Installing monitoring tools
 
 After configuring the device the next thing you need to do, is
 to install the monitoring scripts on the device.
+
+... TBC
+
+### Configuring 3G modem
 
 ... TBC
 
