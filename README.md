@@ -34,8 +34,8 @@ The following readme is split into two: Installation
 (at the polling places). To empower as many users as possible it is
 very detailed, down to every necessary command.
 
-**IMPORTANT: Consult your contries legislation before starting
-to record people's MAC addresses! You have been warned.**
+**IMPORTANT: Consult the legislation before recording people's MAC
+addresses. You have been warned.**
 
 **Note:** Data will be captured on the channel the device is set
 to monitor by default. One can argue whether or not this is desirable,
