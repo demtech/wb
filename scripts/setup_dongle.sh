@@ -31,13 +31,8 @@ opkg install usb-modeswitch
 opkg install kmod-usb-serial kmod-usb-serial-option kmod-usb-serial-wwan --force-depends
 
 ##
-## Next we modify modeswitch configs, insert ppp0 interface and configure chat
+## Then we setup PPP and the network interface
 ##
-
-# Setup the dongle driver with the right info about the E353 device
-sed -i '68i              ,"55534243ee0000006000000000000611063000000000000100000000000000"' /etc/usb-mode.json
-sed -e "1349s/29/64/" /etc/usb-mode.json > /etc/usb-mode2.json
-mv /etc/usb-mode2.json /etc/usb-mode.json
 
 # Setup network information (only if not already there)
 grep "ppp0" /etc/config/network 1>/dev/null
@@ -55,6 +50,15 @@ fi
 
 # Configure chat
 sed -i 's/***1//g' /etc/chatscripts/3g.chat
+
+##
+## Next we modify modeswitch configs and inserts drivers
+##
+
+# Setup the dongle driver with the right info about the E353 device
+sed -i '68i              ,"55534243ee0000006000000000000611063000000000000100000000000000"' /etc/usb-mode.json
+sed -e "1349s/29/64/" /etc/usb-mode.json > /etc/usb-mode2.json
+mv /etc/usb-mode2.json /etc/usb-mode.json
 
 # Force-load the drivers
 insmod usbserial vendor=0x12d1 product=0x1001
