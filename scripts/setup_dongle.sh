@@ -70,4 +70,4 @@ insmod option
 #cat /dev/ttyUSB2 &
 #IMEI=`echo -e "ATI\r" > /dev/ttyUSB2 | grep IMEI | cut -d f2`
 #CODE=`python unlock.py $IMEI`
-#echo -e 'AT^CARDLOCK="$CODE"\r' > /dev/ttyUSB2#!/bin/ash
+#echo -e 'AT^CARDLOCK="$CODE"\r' > /dev/ttyUSB2
