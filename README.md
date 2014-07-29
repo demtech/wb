@@ -132,13 +132,50 @@ the device is no longer available via 192.168.1.1.
 
 ### Installing monitoring tools
 
-After configuring the device the next thing you need to do, is
+After configuring the device the next step is
 to install the monitoring scripts on the device.
 
-... TBC
+#### Monitoring
+For monitoring we are using ``tcpdump`` which is a part of opkg -
+the OpenWRT package manager. However, there is not enough memory
+in the MR3020 router, so we are forced to install it on volatile
+memory after every boot.
+
+At boot we will also have to start the actual monitoring by
+calling ``tcpdump``. This call is performed in [``capture.sh``](https://github.com/demtech/wb/blob/master/scripts/capture.sh)
+where we essentially create a unique number (to differentiate between
+monitoring across boots) and starts ''tcpdump''.
+
+#### Post-processing
+This data needs to be
+forwarded to a server, so whenever 100kB of data has been recorded,
+it is processed by [``postproccess.sh``](https://github.com/demtech/wb/blob/master/scripts/postprocess.sh).
+This script does four things: It 1) creates a unique id for the router
+(based on the ip) so we can distiguish the data on the server, 2) converts
+the binary ``tcpdump``-data to a textual representation, 3) sends it
+over SSH to the server and 4) deletes the data from the white box.
+The third step requires a key. For now it's
+positioned in ``/root/sshkey``. This is very unsafe and should be changed!
+:-) However, changing the data-transfering and processing should be
+confined to manipulating the``postproccess.sh`` script (except for any
+key-exchanging, which should probably be made in the ``startup.sh`` script
+seen below).
+
+#### Startup-scripts
+To start these processes a script
+called [``startup.sh``](https://github.com/demtech/wb/blob/master/scripts/startup.sh)
+has been written. The first part relates to the 3G modem, so I'll skip to #31 for
+now. It installs the ``tcpdump`` package, creates a temporary folder for the data
+and starts the ``capture.sh`` script.
+
+#### Summary: How to install monitoring tools
+So; for the monitoring-part to work the ``startup.sh``, ``capture.sh``
+and ``postprossess.sh`` scripts all  needs to be transfered to the white
+box. And for the ``startup.sh`` script to be executed on boot, a line
+will need to be inserted into ``/etc/rc.local`` (which is a simple .sh
+file run on boot). See [``setup_monitoring.sh#22``](https://github.com/demtech/wb/blob/master/scripts/setup_monitoring.sh#L22) for inspiration.
 
 ### Configuring 3G modem
-
 ... TBC
 
 ## Polling-place setup
