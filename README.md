@@ -1,7 +1,7 @@
 DemTech-openwrt-setup
 =====================
 
-Version 0.2
+Version 3, 2014/07/29
 
 ## Introduction
 
@@ -21,7 +21,7 @@ via a shell, and onto a device running the
 devices (in this case devices with wireless antennas).
 Instructions for rooting any router device should be
 present on the OpenWrt website. Monitoring traffic
-generates a lot of data, so for this setup we are using a 3GPP device
+generates a lot of data, so for this setup we are using a 3G device
 to transfer the data to a server for storage.
 
 Following a successful installation, a script will be started whenever
@@ -39,13 +39,12 @@ but all devices should be caught scanning once in a while
 all available frequencies.
 
 ## Installation out of the box
-
 Before installation we assume a OpenWRT image has been installed
 on the device. An image for the TP-Link MR3020 can be found in the
-''data'' folder.
+``data`` folder.
 
 If you have the same configuration as we have, it should be as 
-simple as running ''setup.sh'' in the root folder with up to five
+simple as running ``setup.sh`` in the root folder with up to five
 parameters: The new address of the router, the address of the
 server to store the data, the PIN code for the 3G device, the name of
 the network interface where the router is connected and lastly the
@@ -59,22 +58,21 @@ activated. This can be done from any computer. See the section
 on [Activation of the 3G modem](https://github.com/demtech/wb/blob/master/README.md#activation-of-the-3g-modem).
 	
 ## Manual installation
-
 Failing automated install the router can be configured manually.
-Please refer to ''setup.sh'' and the ''scripts'' directory
+Please refer to ``setup.sh`` and the ``scripts`` directory
 for inspiration.
 
 Installation can be broken down to 3 steps:
 
-1. [Setting up the device](https://github.com/demtech/wb#device-setup)
+1. [Setting up the white box](https://github.com/demtech/wb#white-box-setup)
 2. [Installing monitoring tools](https://github.com/demtech/wb#installing-monitoring-tools)
 3. [Configuring 3G modem](https://github.com/demtech/wb#configuring-3g-modem)
 
-### Device setup
+### White box setup
 This setup has been tested to work on a Debian 7 machine. In
 the following scripts the host-machine is connected to the internet
-via the ''wlan0'' interface while being connected to the router via
-ethernet on the interface ''eth0''.
+via the ``wlan0`` interface while being connected to the router via
+ethernet on the interface ``eth0``.
 
 #### Routing
 To enable connection between the devices and the host, and
@@ -122,15 +120,12 @@ accessed via ssh. This can be done in the system-tab -> administration.
 
 If you have multiple devices you would probably want to give
 the ethernet interface another address (in the Network tab).
-As you can see below I have chosen 192.168.1.101 as an example
-here. But anything goes.
 
 Lastly it is a good idea to synchronize the time (in
 the System-tab). Note that when you change the interface above,
 the device is no longer available via 192.168.1.1.
 
 ### Installing monitoring tools
-
 After configuring the device the next step is
 to install the monitoring scripts on the device.
 
@@ -153,17 +148,18 @@ This script does four things: It 1) creates a unique id for the router
 (based on the ip) so we can distiguish the data on the server, 2) converts
 the binary ``tcpdump``-data to a textual representation, 3) sends it
 over SSH to the server and 4) deletes the data from the white box.
-The third step requires a key. For now it's
-positioned in ``/root/sshkey``. This is very unsafe and should be changed!
+
+The third step requires a key to be distributed to the thiw boxes. For now it's
+placed in ``/root/sshkey``. This is very unsafe and should be changed!
 :-) However, changing the data-transfering and processing should be
 confined to manipulating the``postproccess.sh`` script (except for any
 key-exchanging, which should probably be made in the ``startup.sh`` script
 seen below).
 
 #### Startup-scripts
-To start these processes a script
+To start these monitoring processes a script
 called [``startup.sh``](https://github.com/demtech/wb/blob/master/scripts/startup.sh)
-has been written. The first part relates to the 3G modem, so I'll skip to #31 for
+has been written. The first part relates to the 3G modem, so I'll skip to line 31 for
 now. It installs the ``tcpdump`` package, creates a temporary folder for the data
 and starts the ``capture.sh`` script.
 
@@ -232,30 +228,48 @@ Now the router should be able to see the modem (after a reboot).
 Before it can be used it should be activated. This is another omnious
 process involving a python script that took me quite some time to
 procure: [``unlock.py``](https://github.com/demtech/wb/blob/master/scripts/unlock.py).
-
 It takes an IMEI number as input, and gives the key needed to unlock
 the device as an output.
 
 To obtain the IMEI number open a connection to the router by cat'ing
 the device (typically ``/dev/ttyUSB0``) in the background.
 If you echo the string ``ATI\r`` (with special characters) to the modem
-an IMEI should pop up in the console. Give that to the script and
+an IMEI should pop up in the console (see [``setup_dongle.sh#68`` ff.](https://github.com/demtech/wb/blob/master/scripts/setup_dongle.sh#L68)).
+Give that to the script and
 Send the result to the device formatted like so: ``AT^CARDLOCK="{CODE}"\r``
 where ``{CODE}`` is the resulting unlock-code. Now your device should be
 unlocked.
 
 #### Boot-configuration of the 3G modem
 This section related to the first 31 lines in
-[``startup.sh``](https://github.com/demtech/wb/blob/master/scripts/startup.sh),
-which I assume have already been transferred to the device.
+[``startup.sh``](https://github.com/demtech/wb/blob/master/scripts/startup.sh).
+I assume that the file has already been transferred to the device
+and that the call to the script has been written in ``/etc/rc.local``.
 
 At startup the drivers will need to be loaded and if the device
-is not available then (lines 19-23), a failure occurred at setup.
+is not available (lines 19-23), a failure probably occurred at setup.
 
 After this the ppp0 interface should connect and the modem can
 go online. This is an asynchronous process, so the script sleeps
-for 30 seconds, before trying to reach the package server and
-install the monitoring tools.
+for 30 seconds before trying to reach the package server and
+install the monitoring tools. Now the monitoring should continue
+until it is manually shutdown.
+
+## Technical difficulties
+One issue we ran into was signal strength and failure
+tolerance for the 3G modem. One of the polling places was
+encased in solid concrete, which meant the the modems could
+not download the monitoring packages to capture the
+probe requests. While the 3G technology has benefits because
+of its mobility, it could be interesting to make the white
+boxes more fail-safe when the 3G network is unavailable.
+
+Also, I will mention that we have been struggling with drivers
+randomly crashing irregularly. In particular this appeared to 
+be a problem when using the FAT filesystem on the USB devices
+to store the data. The problem have been fixed in more recent
+versios of OpenWRT, which is why we are using the (at the time
+unfinished) Barrier Breaking version.
 
 ## Conclusion
 This is an exceptionally powerful tool since even the smallest
@@ -267,18 +281,12 @@ triangulate positions if more routers are set up.
 
 The setup are not perfect, however. There are still a number
 of technical hurdles to climb, so it is still not open for
-layman. Another large challenge are the planned iOS changes
-where MAC-addresses are randomly shifted. This will make us
+layman. Another large challenge is the planned iOS change
+where MAC-addresses are randomly shifted when performing
+probe requests. This will make us
 unable to track any user for a longer period of time, 
 resulting in a serious blow to this type of tools
 ([see TechCrunch](http://techcrunch.com/2013/06/14/ios-7-eliminates-mac-address-as-tracking-option-signaling-final-push-towards-apples-own-ad-identifier-technology/?_ga=1.61162732.1122695649.1406633760)).
-
-Lastly, I will mention that I have been struggling with drivers
-randomly crashing irregularly. In particular this appeared to 
-be a problem when using the FAT filesystem on the USB devices
-to store the data. The problem have been fixed in more recent
-versios of OpenWRT, which is why we are using the (at the time
-unfinished) Barrier Breaking version.
 
 Please direct any questions or comments to the DemTech research group
 at http://demtech.dk
