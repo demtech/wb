@@ -20,7 +20,7 @@ via a shell, and onto a device running the
 [OpenWrt](https://openwrt.org/) Linux distribution for embedded
 devices (in this case devices with wireless antennas).
 Instructions for rooting any router device should be
-present on the OpenWrt website<sup>[1]</sup>. Monitoring traffic
+present on the OpenWrt website. Monitoring traffic
 generates a lot of data, so for this setup we are using a 3GPP device
 to transfer the data to a server for storage.
 
@@ -28,11 +28,6 @@ Following a successful installation, a script will be started whenever
 the OpenWrt router (the client) boots. This script logs all the
 wireless probe requests in the vicinity and once 100kB data is collected,
 it sends it to the given host.
-
-The following readme is split into two: Installation
-(prior to gathering data at polling places) and setup
-(at the polling places). To empower as many users as possible it is
-very detailed, down to every necessary command.
 
 **IMPORTANT: Consult the legislation before recording people's MAC
 addresses. You have been warned.**
@@ -262,44 +257,28 @@ go online. This is an asynchronous process, so the script sleeps
 for 30 seconds, before trying to reach the package server and
 install the monitoring tools.
 
-## Polling-place setup
-When the routers have been configured they are ready to capture data.
-However, before being functional at the polling stations, two
-things need to happen: First the clients (OpenWrt devices)
-should be positioned in the vicinity of the polling queue and second
-the keys for the server and the hashing of the MAC addresses should
-be distributed.
-
-### Positioning of the devices
-
-... TBC
-
-### Key distribution
-... To be continued
-
 ## Conclusion
 This is an exceptionally powerful tool since even the smallest
 and simplest devices with wifi-antennas are capable of
 surveilling a large number of people over a large amount of time.
-The information captures by tcpdump can be used for many many
+The information captured by tcpdump can be used for many
 purposes, ranging from tracking individuals to perhaps even
 triangulate positions if more routers are set up. 
 
-The setup are not perfect, however. Tcpdump only captures traffic
-on the default channel of the antenna, which limits a lot of the
-logged data to scans from mobile devices searching for networks. 
+The setup are not perfect, however. There are still a number
+of technical hurdles to climb, so it is still not open for
+layman. Another large challenge are the planned iOS changes
+where MAC-addresses are randomly shifted. This will make us
+unable to track any user for a longer period of time, 
+resulting in a serious blow to this type of tools
+([see TechCrunch](http://techcrunch.com/2013/06/14/ios-7-eliminates-mac-address-as-tracking-option-signaling-final-push-towards-apples-own-ad-identifier-technology/?_ga=1.61162732.1122695649.1406633760)).
 
-Also, I have been struggling with drivers randomly crashing
-irregularly. In particular this appeared to be a problem when using
-the FAT filesystem on the USB devices to store the data. The problem
-have been fixed in more recent versios of OpenWRT, which is why we
-are using the (unfinished) Barrier Breaking version.
-
-As a partial fix, I have included a cron-job in the setup-scripts
-that checks if any data have been logged for a minute. If not, we
-restart the wireless interface.
+Lastly, I will mention that I have been struggling with drivers
+randomly crashing irregularly. In particular this appeared to 
+be a problem when using the FAT filesystem on the USB devices
+to store the data. The problem have been fixed in more recent
+versios of OpenWRT, which is why we are using the (at the time
+unfinished) Barrier Breaking version.
 
 Please direct any questions or comments to the DemTech research group
 at http://demtech.dk
-
-[1]: https://openwrt.org/ "OpenWrt homepage"
