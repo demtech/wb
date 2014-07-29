@@ -59,6 +59,10 @@ the internet. As an example this should work:
 	
 	sudo ./setup.sh 192.168.0.1 1.2.3.4 1234 eth0 wlan0
 	
+**HOWEVER**: Before the 3G modem can be used, it needs to be
+activated. This can be done from any computer. See the section
+on [Activation of the 3G modem](https://github.com/demtech/wb/blob/master/README.md#activation-of-the-3g-modem).
+	
 ## Manual installation
 
 Failing automated install the router can be configured manually.
@@ -176,7 +180,87 @@ will need to be inserted into ``/etc/rc.local`` (which is a simple .sh
 file run on boot). See [``setup_monitoring.sh#22``](https://github.com/demtech/wb/blob/master/scripts/setup_monitoring.sh#L22) for inspiration.
 
 ### Configuring 3G modem
-... TBC
+I hope my step-by-step guides are not tiring you, because here comes
+yet another one. Four things is needed for the modem to work:
+
+1. Interface and PPP setup
+2. Driver configuration on the white box
+3. Activation of the 3G modem
+4. Boot-configuration of the 3G modem
+
+Note from Jens: This took me a staggering amount of time to get
+right. If you run into trouble and think I can alleviate some of
+your pain to a fraction of the level I was exposed to, this might
+be a good time to consider writing me.
+
+#### Interface and PPP setup
+This - and all others related to the dongle - is described in the [``setup_dongle.sh``](https://github.com/demtech/wb/blob/master/scripts/setup_dongle.sh)
+script.
+
+Before setting up the modem we should configure the interface, so
+the router can attach the device as soon as it finds it. It's as
+simple as adding lines to the ``/etc/config/network`` file (see
+[``setup_dongle.sh#37-49``](https://github.com/demtech/wb/blob/master/scripts/setup_dongle.sh#L37).
+Note that the PIN-code is needed in the option ``pincode``.
+
+Setting up the Point-to-Point Protocol is vendor-specific, so if
+something else than Fullrate is used, it should probably be changed.
+For Fullrate the only change in the chat-script is to alter the
+string ``ATD*99***1#`` to ``"ATD*99#``.
+
+See [https://dev.openwrt.org/browser/trunk/package/comgt/files/3g.chat?rev=5433](https://dev.openwrt.org/browser/trunk/package/comgt/files/3g.chat?rev=5433) for the original 3g.chat file.
+
+#### Drivers
+First the necessary packages are installed. Then (and this is
+where the fun begins) we need to 'flip' the device from a flash-storage
+to an actual 3G modem. Normally vendors places two devices in one USB
+stick: one with the drivers and one with the actual functionality. So
+when Windows or Mac reads the driver from the flash-drive, the driver
+automatically flips state. To do that on the white boxes, we need to
+send the USB stick a message. The message only fits for for E353 device,
+so if you get another stick you will need to find a different message.
+
+The messages comes with the ``usb-modeswitch`` package, and can be
+found in ``/etc/usb-mode.json``. The data might change, so the code
+in the [``setup_dongle.sh#38-40``](https://github.com/demtech/wb/blob/master/scripts/setup_dongle.sh#L38)
+might deprecate. In that case I have stored a functional file in the data folder:
+[``usb-mode.json``](https://github.com/demtech/wb/blob/master/data/usb-mode.json).
+
+The last step in the driver configuration is to load the actual
+drivers by the ``insmod`` command [``setup_dongle.sh#60-62``](https://github.com/demtech/wb/blob/master/scripts/setup_dongle.sh#L60).
+For debugging purposes it might be worth noting the device id before and
+after the switch. The vendor (12d1) stays the same, but the product
+switches from 1f01 to 1001. 
+
+#### Activation of the 3G modem
+Now the router should be able to see the modem (after a reboot).
+Before it can be used it should be activated. This is another omnious
+process involving a python script that took me quite some time to
+procure: [``unlock.py``](https://github.com/demtech/wb/blob/master/scripts/unlock.py).
+
+It takes an IMEI number as input, and gives the key needed to unlock
+the device as an output.
+
+To obtain the IMEI number open a connection to the router by cat'ing
+the device (typically ``/dev/ttyUSB0``) in the background.
+If you echo the string ``ATI\r`` (with special characters) to the modem
+an IMEI should pop up in the console. Give that to the script and
+Send the result to the device formatted like so: ``AT^CARDLOCK="{CODE}"\r``
+where ``{CODE}`` is the resulting unlock-code. Now your device should be
+unlocked.
+
+#### Boot-configuration of the 3G modem
+This section related to the first 31 lines in
+[``startup.sh``](https://github.com/demtech/wb/blob/master/scripts/startup.sh),
+which I assume have already been transferred to the device.
+
+At startup the drivers will need to be loaded and if the device
+is not available then (lines 19-23), a failure occurred at setup.
+
+After this the ppp0 interface should connect and the modem can
+go online. This is an asynchronous process, so the script sleeps
+for 30 seconds, before trying to reach the package server and
+install the monitoring tools.
 
 ## Polling-place setup
 When the routers have been configured they are ready to capture data.
