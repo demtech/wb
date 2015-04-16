@@ -1,3 +1,5 @@
+# Install 
+
 Install to USB
 
 Edit /etc/profile and add the new mount point to your paths variables:
@@ -14,4 +16,4 @@ touch /mnt/usb/USB_DISK_NOT_PRESENT
 
 
 
-*/1 * * * * . /etc/profile; /root/capture.sh
+echo "*/1 * * * * . /etc/profile; /root/capture.sh" >> /etc/crontab/root

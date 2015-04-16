@@ -7,6 +7,14 @@
 ## Author: <jensep@gmail.com>
 ##
 
+
+# Internet Sharing
+
+sudo sysctl net.ipv4.ip_forward=1
+sudo iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+
 ## Check number of arguments
 if [ $# -lt 4 ] ; then
 	echo "A script to install monitoring tools on an external router."
