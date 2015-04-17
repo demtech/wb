@@ -1,11 +1,13 @@
 #!/bin/bash
 ##
 ## A script for setting up monitoring tools on
-## a TP-Link TL-MR3020 device with a Huawei
-## E353Ws-2 3G dongle
+## a TP-Link TL-MR13U
 ##
 ## Author: <jensep@gmail.com>
-##
+## Author: <jian@demtech.dk>
+
+# Enable/disable wlan0 on WB
+ifconfig wlan0 up/down
 
 
 # Internet Sharing
