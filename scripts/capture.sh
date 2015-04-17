@@ -14,13 +14,9 @@ sleep 1
 
 # Put wireless device in monitor mode and enable wireless device, in case needed
 ifconfig wlan0 down
-
 sleep 1
-
 iw dev wlan0 set type monitor
-
 sleep 1
-
 ifconfig wlan0 up
 
 # Check if mounted correctly, if not do it before anything else happened
