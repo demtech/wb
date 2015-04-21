@@ -3,3 +3,4 @@ sshkey*
 openwrt*
 *.swp
 *.swo
+*bak

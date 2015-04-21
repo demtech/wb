@@ -20,39 +20,48 @@ sleep 1
 ifconfig wlan0 up
 
 # Check if mounted correctly, if not do it before anything else happened
-while [ -f /opt/USB_DISK_NOT_PRESENT ]
-do
-    sleep 3
+if [ -f /mnt/sda2/USB_DISK_NOT_PRESENT ] ; then
+    sleep 1
 
-    mount="/dev/sda1"
+    mount="/dev/mapper/usb_luks"
 
     if grep -qs "$mount" /proc/mounts; then
-        echo "It's mounted."
+        echo "Sda2 is mounted."
     else
-        echo "It's not mounted."
-        mount "$mount" /mnt/usb
+        echo "Sda2 is not mounted."
+
+        mount "$mount" /mnt/sda2
         if [ $? -eq 0 ]; then
             echo "Mount success!"
         else
             echo "Something went wrong with the mount..."
         fi
     fi
-done
+fi
+
+# Only try to mount once
+if [ -f /mnt/sda2/USB_DISK_NOT_PRESENT ] ; then
+    exit 0
+fi
 
 # Check if data folder exists, if not creat one
-if [ ! -d /opt/data ] ; then
-    mkdir -p /opt/data
+if [ ! -d /mnt/sda2/data ] ; then
+    mkdir -p /mnt/sda2/data
 fi
 
 # Create a counter to keep track of (possible) different
 # running instances across boots
-if [ ! -f /opt/n ] ; then
-    echo "0" > /opt/n
+if [ ! -f /mnt/sda2/n ] ; then
+    echo "0" > /mnt/sda2/n
 fi
 
 # Increment the counter
-N=$(($(cat /opt/n) + 1))
-echo $N > /opt/n
+N=$(($(cat /mnt/sda2/n) + 1))
+echo $N > /mnt/sda2/n
+
+# Track restart time
+echo $N >> /mnt/sda2/t
+echo $(date) >> /mnt/sda2/t
 
 # Start tcpdump with flags:
 # -i      The interface
@@ -64,5 +73,5 @@ echo $N > /opt/n
 # -q      Quiet means reduced output (not really sure what it does)
 # -s      Package size (we don't care about the actual data)
 
-/opt/usr/sbin/tcpdump -i wlan0 -B 1024 -w "/opt/data/${N}_dump" -C 1 -neq -s 0 &
+/usr/sbin/tcpdump -i wlan0 -B 1024 -w "/mnt/sda2/data/${N}_dump" -C 1 -neq -s 0 &
 
