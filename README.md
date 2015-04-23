@@ -86,10 +86,11 @@ It installs the ``tcpdump`` package, creates a temporary folder for the data
 and starts the ``capture.sh`` script.
 
 #### Summary: How to install monitoring tools
-So; for the monitoring-part to work the ``init.sh`` and ``capture.sh`` scripts both needs to be transferred to the white box.
+So; for the monitoring-part to work the ``capture.sh`` and ``stop.sh`` scripts both needs to be transferred to the white box.
 And for the ``capture.sh`` script to be executed on boot, a line
 will need to be inserted into ``/etc/crontab/root`` (which is a simple .sh file run on boot).
 See [``setup_monitoring.sh#22``](https://github.com/demtech/wb/blob/master/scripts/setup_monitoring.sh#L22) for inspiration.
+The ``stop.sh`` script is used to stop the monitoring and put the USB stick into encrypted mode.
 
 ## Technical difficulties
 In the early trails, we have been struggling with drivers randomly crashing irregularly.
@@ -102,7 +103,7 @@ unfinished) Barrier Breaking version via ext4 file-system.
 This is an exceptionally powerful tool since even the smallest and simplest devices with wifi-antennas are capable of surveilling a large number of people over a large amount of time.
 The information captured by tcpdump can be used for many purposes, ranging from tracking individuals to perhaps even triangulate positions if more routers are set up.
 
-The setup are not perfect, however.
+The setup is not perfect, however.
 There are still a number of technical hurdles to climb, so it is still not open for layman.
 Another large challenge is the planned iOS change where MAC-addresses are randomly shifted when performing probe requests.
 This will make us unable to track any user for a longer period of time, resulting in a serious blow to this type of tools
