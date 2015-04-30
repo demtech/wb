@@ -4,10 +4,10 @@ ifconfig wlan0 up/down
 
 # Install USB support package
 
-opkg update
-opkg install kmod-usb-storage
-opkg install kmod-fs-ext4
-
+opkg update;
+opkg install kmod-usb-storage;
+opkg install kmod-fs-ext4;
+opkg install block-mount; # for exroot
 mkdir -p /mnt/sda1
 touch /mnt/sda1/USB_DISK_NOT_PRESENT
 
@@ -32,16 +32,13 @@ dest usb /opt
 
 opkg -dest usb install tcpdump
 
+
+
 # -----------------------------------------------------------------------------
 # Option 2. Use exroot
-
-# Descrpt & mount encrypted partition
-# mount -t jffs2 /dev/mtdblock3 /mnt/mtb3/
-# cat /mnt/mtb3/mnt/pass  | cryptsetup luksOpen /dev/sda2 usb_luks
-
-cryptsetup luksOpen /dev/sda2 usb_luks
-mount /dev/mapper/usb_luks /mnt/sda2
-umount /mnt/sda2 && cryptsetup luksClose usb_luks
+mkdir -p /mnt/sda1;
+touch /mnt/sda1/USB_DISK_NOT_PRESENT;
+mount /dev/sda1 /mnt/sda1;
 
 # extroot to extend root space
 tar -C /overlay -cvf - . | tar -C /mnt/sda1 -xf -
@@ -49,7 +46,7 @@ tar -C /overlay -cvf - . | tar -C /mnt/sda1 -xf -
 # /etc/config/fstab
 config mount
         option target '/overlay'
-        option uuid '1902a323-79a6-4b1a-a511-a58655974ee9'
+        option uuid '1902a323-79a6-4b1a-a511-a58655974ee9' # run block detect
         option enabled '1'
         option fstype 'ext4'
 
@@ -58,6 +55,18 @@ opkg install tcpdump
 
 opkg install cryptsetup lvm2 kmod-crypto-aes kmod-crypto-misc kmod-crypto-xts kmod-crypto-iv kmod-crypto-cbc kmod-crypto-hash kmod-dm
 echo sha256_generic >/etc/modules.d/11-crypto-misc
+
+
+
+# -----------------------------------------------------------------------------
+# Descrpt & mount encrypted partition
+# mount -t jffs2 /dev/mtdblock3 /mnt/mtb3/
+# cat /mnt/mtb3/mnt/pass  | cryptsetup luksOpen /dev/sda2 usb_luks
+
+cryptsetup luksOpen /dev/sda2 usb_luks
+mount /dev/mapper/usb_luks /mnt/sda2
+umount /mnt/sda2 && cryptsetup luksClose usb_luks
+
 
 
 # -----------------------------------------------------------------------------
@@ -87,4 +96,4 @@ mount /dev/mapper/wb /mnt
 umount /mnt
 cryptsetup close wb
 
-
+sudo ip addr add 192.168.1.101/24 broadcast 192.168.1.255 dev eth0

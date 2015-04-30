@@ -20,33 +20,29 @@ sleep 1
 ifconfig wlan0 up
 
 # Check if mounted correctly, if not do it before anything else happened
+mountdev="/dev/sda2"
 mountsda="/mnt/sda2"
-mountluks="/dev/mapper/usb_luks"
 
+# Check if sda2 folder exists, if not creat one
 if [ ! -d /mnt/sda2 ] ; then
     mkdir -p /mnt/sda2
     touch /mnt/sda2/USB_DISK_NOT_PRESENT
 fi
 
+# Check the mount
 sleep 1
-if grep -qs "$mountluks" /proc/mounts; then
-    echo "luks is mounted."
+if grep -qs "$mountsda" /proc/mounts; then
+    echo "sda2 is mounted."
 else
-    echo "luks is not mounted."
-    # check if /mnt/sda2 is in use
+    echo "sda2 is not mounted."
 
-    if grep -qs "$mountsda" /proc/mounts; then
-        umount "$mountsda"
-    fi
-
-    mount "$mountluks" "$mountsda"
+    mount "$mountdev" "$mountsda"
     if [ $? -eq 0 ]; then
         echo "Mount success!"
     else
         echo "Something went wrong with the mount..."
     fi
 fi
-
 
 # Only try to mount once
 if [ -f /mnt/sda2/USB_DISK_NOT_PRESENT ] ; then
@@ -55,12 +51,14 @@ fi
 
 # Check if data folder exists, if not creat one
 if [ ! -d /mnt/sda2/data ] ; then
+    echo "Create data folder"
     mkdir -p /mnt/sda2/data
 fi
 
 # Create a counter to keep track of (possible) different
 # running instances across restart
 if [ ! -f /mnt/sda2/n ] ; then
+    echo "Create n file"
     echo "0" > /mnt/sda2/n
 fi
 
