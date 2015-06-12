@@ -2,13 +2,18 @@
 # Enable/disable wlan0 on WB
 ifconfig wlan0 up/down
 
-# Install USB support package
+# Connect to wifi
+ifconfig wlan0 up;
+iw dev wlan0 connect Demtech;
+udhcpc -i wlan0;
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf;
 
+# Install USB support package
 opkg update;
 opkg install kmod-usb-storage;
 opkg install kmod-fs-ext4;
-opkg install block-mount; # for exroot
-mkdir -p /mnt/sda1
+opkg install block-mount;
+mkdir -p /mnt/sda1;
 touch /mnt/sda1/USB_DISK_NOT_PRESENT
 
 mount /dev/sda1 /mnt/sda1
@@ -51,7 +56,8 @@ config mount
         option fstype 'ext4'
 
 # Install package
-opkg install tcpdump
+opkg update;
+opkg install tcpdump;
 
 opkg install cryptsetup lvm2 kmod-crypto-aes kmod-crypto-misc kmod-crypto-xts kmod-crypto-iv kmod-crypto-cbc kmod-crypto-hash kmod-dm
 echo sha256_generic >/etc/modules.d/11-crypto-misc
@@ -63,7 +69,7 @@ echo sha256_generic >/etc/modules.d/11-crypto-misc
 # mount -t jffs2 /dev/mtdblock3 /mnt/mtb3/
 # cat /mnt/mtb3/mnt/pass  | cryptsetup luksOpen /dev/sda2 usb_luks
 
-cryptsetup luksOpen /dev/sda2 usb_luks
+cryptsetup luksOpen /dev/sda2 usb_luks;
 mount /dev/mapper/usb_luks /mnt/sda2
 umount /mnt/sda2 && cryptsetup luksClose usb_luks
 
