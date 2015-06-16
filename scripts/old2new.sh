@@ -12,7 +12,7 @@ src/gz chaos_calmer_management http://downloads.openwrt.org/barrier_breaker/14.0
     reboot -f
 
     ifconfig wlan0 up;
-    iw dev wlan0 connect Tardis;
+    iw dev wlan0 connect Demtech;
     udhcpc -i wlan0;
     echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 

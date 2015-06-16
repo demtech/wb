@@ -69,8 +69,8 @@ N=$(($(cat /mnt/sda2/n) + 1))
 echo $N > /mnt/sda2/n
 
 # Track restart time
-echo $N >> /mnt/sda2/t
-echo $(date) >> /mnt/sda2/t
+echo $N >> /mnt/sda2/time
+echo $(date) >> /mnt/sda2/time
 
 # Start tcpdump with flags:
 # -i      The interface

@@ -55,19 +55,21 @@ config mount
         option enabled '1'
         option fstype 'ext4'
 
-# Install package
+# Install package tcpdum & cryptsetup
 opkg update;
 opkg install tcpdump;
 
-opkg install cryptsetup lvm2 kmod-crypto-aes kmod-crypto-misc kmod-crypto-xts kmod-crypto-iv kmod-crypto-cbc kmod-crypto-hash kmod-dm
-echo sha256_generic >/etc/modules.d/11-crypto-misc
+opkg install cryptsetup lvm2 kmod-crypto-aes kmod-crypto-misc kmod-crypto-xts kmod-crypto-iv kmod-crypto-cbc kmod-crypto-hash kmod-dm;
+#echo sha256_generic >/etc/modules.d/11-crypto-misc
 
-
+reboot;
 
 # -----------------------------------------------------------------------------
 # Descrpt & mount encrypted partition
 # mount -t jffs2 /dev/mtdblock3 /mnt/mtb3/
 # cat /mnt/mtb3/mnt/pass  | cryptsetup luksOpen /dev/sda2 usb_luks
+mkdir -p /mnt/sda2;
+touch /mnt/sda2/USB_DISK_NOT_PRESENT;
 
 cryptsetup luksOpen /dev/sda2 usb_luks;
 mount /dev/mapper/usb_luks /mnt/sda2
@@ -80,15 +82,19 @@ umount /mnt/sda2 && cryptsetup luksClose usb_luks
 
 ifconfig wlan0 down
 
+# RESTART CRON ！！！！！！！！！！！！！
 # cronjob for restarting tcpdump
 #       M   H D M W
 # echo "*/5 * * * * . /etc/profile; /root/capture.sh" >> /etc/crontabs/root
-echo "*/5 * * * * /root/capture.sh" >> /etc/crontabs/root
-
+echo "*/5 8-20 18 6 * /root/capture.sh" > /etc/crontabs/root;
+echo "1 21 18 6 * /root/stop.sh" >> /etc/crontabs/root
 
 1 7 27 *  * ifconfig wlan0 up
 */5 7-20 27 * * /root/capture.sh
 1 20 27 * * /root/stop.sh
+
+ae84b2e91d6f3c5a106aae76ad919676  capture.sh
+d41c4527a0c20e0a6c6e541c74dc39d5  stop.sh
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -103,3 +109,6 @@ umount /mnt
 cryptsetup close wb
 
 sudo ip addr add 192.168.1.101/24 broadcast 192.168.1.255 dev eth0
+
+# cp
+scp capture.sh stop.sh root@192.168.10.7:/root/
