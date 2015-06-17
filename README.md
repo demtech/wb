@@ -4,12 +4,14 @@ DemTech-openwrt-setup 2015
 TP-Link MR13U Version, 2015/04
 
 ## Introduction
-This is a repository containing instructions on how to setup monitoring
-tools for a [DemTech](http://demtech.dk) project.
+This is a repository containing instructions on how to setup queue length monitoring tools for a [DemTech](http://demtech.dk) project.
 The idea is to use devices with WiFi antennas to monitor queue lengths at polling places by registering how long WiFi devices are in range.
 This readme describes how to setup the routers and start capturing and recording data.
 
 Any questions or comments can be directed to DemTech at http://demtech.dk.
+
+## Device
+The Device we use is [TP-Link MR13U with OpenWRT](http://wiki.openwrt.org/toh/tp-link/tl-mr13u) installed.
 
 ## Setup
 The scripts are designed to be run on a Linux host machine via a shell, and onto a device running the [OpenWrt](https://openwrt.org/) Linux distribution for embedded devices (in this case devices with wireless antennas).
@@ -21,9 +23,8 @@ This script logs all the wireless probe requests in the vicinity and once 1000kB
 
 **IMPORTANT: Consult the legislation before recording people's MAC addresses. You have been warned.**
 
-**Note:** Data will be captured on the channel the device is set to monitor by default.
-One can argue whether or not this is desirable, but all devices should be caught scanning once in a while
-(according to the 802.11 specification), since a scanning covers all available frequencies.
+**Note:** Data will be captured on the channel, which is channel 1 (2.412 GHz frequency with 20 MHz bandwidth) by default, the device is set to monitor mode.
+One can argue whether or not this is desirable, but all devices should be caught scanning once in a while (according to the 802.11 specification).
 
 ## Installation out of the box
 Before installation we assume a [OpenWRT](https://openwrt.org/) image has been installed on the device.
@@ -32,7 +33,6 @@ An image for the TP-Link MR13U can also be found in the ``data`` folder.
 If you have the same configuration as we have, it should be as simple as running ``init.sh`` in the root folder.
 Before you run the script, please make sure the device is connect to the internet, which is necessary for ``opkg`` package installation.
 
-## Manual installation
 Failing automated install the router can be configured manually.
 Please refer the ``scripts`` directory for inspiration.
 
@@ -56,6 +56,8 @@ sudo ip addr add 192.168.1.2/24 broadcast 192.168.1.255 dev eth0
 ````
 A device with a clean OpenWrt installation should resolve itself to 192.168.1.1, which should probably be changed if you are setting up multiple devices.
 
+### Encrypting USB storage
+
 #### Device configuration
 To be able to connect to the device via the shell and Ethernet you need to configure the OpenWrt configuration.
 This can be automated, but it is simpler to just log in to the web-interface, by pointing a browser to 192.168.1.1.
@@ -69,6 +71,32 @@ the ethernet interface another address (in the Network tab).
 
 Lastly it is a good idea to synchronize the time (in the System-tab).
 Note that when you change the interface above, the device may no longer be available via 192.168.1.1.
+
+### Exroot OpenWRT
+Because there's only limited space in the device, so we need [exroot](http://wiki.openwrt.org/doc/howto/extroot) to extend the available space for software installation.
+What we need to do is install the USB and file system drivers, then change the mount table.
+
+````bash
+opkg update;
+opkg install kmod-usb-storage;
+opkg install kmod-fs-ext4;
+opkg install block-mount;
+````
+
+Extroot to extend root space.
+````bash
+mount /dev/sda1 /mnt/sda1;
+tar -C /overlay -cvf - . | tar -C /mnt/sda1 -xf -
+````
+
+change /etc/config/fstab
+````bash
+config mount
+        option target '/overlay'
+        option uuid '1902a323-79a6-4b1a-a511-a58655974ee9' # run block detect
+        option enabled '1'
+        option fstype 'ext4'
+````
 
 ### Installing monitoring tools
 After configuring the device the next step is to install the monitoring scripts on the device.
